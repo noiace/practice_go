@@ -84,6 +84,8 @@ func main() {
 		fmt.Println("Словарь валидный. Дубликатов не найдено")
 	}
 
+	var input string
+	fmt.Scanln(&input)
 }
 
 func CheckFile(filePath string) (string, error) {
