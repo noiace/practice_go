@@ -2,9 +2,7 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
-
-	// "os"
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -70,7 +68,7 @@ func main() {
 				uniqueWords = append(uniqueWords, word)
 			}
 
-			err := ioutil.WriteFile(filePath, []byte(strings.Join(uniqueWords, "\n")), 0644)
+			err := os.WriteFile(filePath, []byte(strings.Join(uniqueWords, "\n")), 0644)
 
 			if err != nil {
 				fmt.Println("Ошибка при записи в файл:", err)
@@ -89,7 +87,7 @@ func main() {
 }
 
 func CheckFile(filePath string) (string, error) {
-	data, err := ioutil.ReadFile(filePath)
+	data, err := os.ReadFile(filePath)
 	if err != nil {
 		return "", fmt.Errorf("не удалось прочитать файл: %v", err)
 	}
