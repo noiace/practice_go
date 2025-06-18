@@ -14,8 +14,8 @@ var (
 
 	// Флаги
 	filePath         = app.Flag("path", "Путь к файлу словаря (обязательно)").Short('p').Required().String()
-	deleteDuplicates = app.Flag("delete-duplicates", "Удалить дубликаты без подтверждения").Short('d').Bool()
-	showDuplicates   = app.Flag("show-duplicates", "Показать дубликаты").Short('s').Bool()
+	deleteDuplicates = app.Flag("delete-duplicates", "Удалить дубликаты без подтверждения").Short('d').Default("false").Bool()
+	showDuplicates   = app.Flag("show-duplicates", "Показать дубликаты").Short('s').Default("false").Bool()
 	mode             = app.Flag("mode", "Режим работы (create/rewrite)").Short('m').Default("rewrite").Enum("create", "rewrite")
 )
 
@@ -83,4 +83,5 @@ func main() {
 	} else if len(duplicates) == 0 {
 		fmt.Println("Дубликатов не найдено.")
 	}
+
 }
