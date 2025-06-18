@@ -5,91 +5,82 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/alecthomas/kingpin/v2"
+)
+
+var (
+	app = kingpin.New("dictchecker", "Проверка словаря на дубликаты.")
+
+	// Флаги
+	filePath         = app.Flag("path", "Путь к файлу словаря (обязательно)").Short('p').Required().String()
+	deleteDuplicates = app.Flag("delete-duplicates", "Удалить дубликаты без подтверждения").Short('d').Bool()
+	showDuplicates   = app.Flag("show-duplicates", "Показать дубликаты").Short('s').Bool()
+	mode             = app.Flag("mode", "Режим работы (create/rewrite)").Short('m').Default("rewrite").Enum("create", "rewrite")
 )
 
 func main() {
-	var filePath string
-	is_valid := true
+	// Парсим аргументы
+	kingpin.MustParse(app.Parse(os.Args[1:]))
 
-	fmt.Println("Введите полный путь к файлу (например, ./text.txt):")
-	fmt.Scanln(&filePath)
-
-	if filepath.Ext(filePath) != ".txt" {
-		is_valid = false
-		fmt.Println(is_valid)
+	// Проверка расширения файла
+	if filepath.Ext(*filePath) != ".txt" {
 		fmt.Println("Ошибка: файл должен иметь расширение .txt")
 		return
 	}
 
-	fmt.Println(filePath)
-	data, err := CheckFile(filePath)
-
+	// Чтение файла
+	data, err := os.ReadFile(*filePath)
 	if err != nil {
-		is_valid = false
-		fmt.Print(is_valid)
-		fmt.Println(err)
+		fmt.Printf("Ошибка чтения файла: %v\n", err)
 		return
 	}
 
-	if data == "" {
-		is_valid = false
-		fmt.Println(is_valid)
-		fmt.Println("Файл пустой.")
+	if len(data) == 0 {
+		fmt.Println("Файл пуст.")
 		return
 	}
 
+	// Поиск дубликатов
+	words := strings.Fields(string(data))
 	dict := make(map[string]int)
-
-	for _, value := range strings.Fields(data) {
-		dict[value]++
+	for _, word := range words {
+		dict[word]++
 	}
 
-	copyExist := false
-	duplicates := []string{}
-
+	// Сбор дубликатов
+	var duplicates []string
 	for word, count := range dict {
 		if count > 1 {
 			duplicates = append(duplicates, word)
-			copyExist = true
 		}
 	}
 
-	if copyExist {
-		fmt.Println("Найдены дубликаты", duplicates)
-		fmt.Println("Желаете ли вы удалить копии y/n?")
-		var response string
-		fmt.Scanln(&response)
+	// Показ дубликатов (если флаг -s)
+	if *showDuplicates && len(duplicates) > 0 {
+		fmt.Println("Найдены дубликаты:", duplicates)
+	}
 
-		if strings.ToLower(response) == "y" {
-
-			uniqueWords := make([]string, 0, len(dict))
-
-			for word := range dict {
-				uniqueWords = append(uniqueWords, word)
-			}
-
-			err := os.WriteFile(filePath, []byte(strings.Join(uniqueWords, "\n")), 0644)
-
-			if err != nil {
-				fmt.Println("Ошибка при записи в файл:", err)
-				return
-			}
-
-			fmt.Println("Дубликаты удалены, файл перезаписан.")
+	// Удаление дубликатов (если флаг -d)
+	if *deleteDuplicates && len(duplicates) > 0 {
+		uniqueWords := make([]string, 0, len(dict))
+		for word := range dict {
+			uniqueWords = append(uniqueWords, word)
 		}
 
-	} else {
-		fmt.Println("Словарь валидный. Дубликатов не найдено")
-	}
+		outputPath := *filePath
+		if *mode == "create" {
+			outputPath = strings.TrimSuffix(*filePath, ".txt") + "_unique.txt"
+		}
 
-	var input string
-	fmt.Scanln(&input)
-}
+		err = os.WriteFile(outputPath, []byte(strings.Join(uniqueWords, "\n")), 0644)
+		if err != nil {
+			fmt.Println("Ошибка при записи:", err)
+			return
+		}
 
-func CheckFile(filePath string) (string, error) {
-	data, err := os.ReadFile(filePath)
-	if err != nil {
-		return "", fmt.Errorf("не удалось прочитать файл: %v", err)
+		fmt.Printf("Дубликаты удалены. Результат сохранён в: %s\n", outputPath)
+	} else if len(duplicates) == 0 {
+		fmt.Println("Дубликатов не найдено.")
 	}
-	return string(data), nil
 }
