@@ -21,6 +21,9 @@ var (
 
 func main() {
 	// Парсим аргументы
+	fmt.Print()
+	fmt.Scan()
+
 	kingpin.MustParse(app.Parse(os.Args[1:]))
 
 	// Проверка расширения файла
@@ -83,5 +86,8 @@ func main() {
 	} else if len(duplicates) == 0 {
 		fmt.Println("Дубликатов не найдено.")
 	}
-
+	if len(os.Args) == 1 {
+		fmt.Print("\nНажмите Enter для выхода...")
+		fmt.Scanln()
+	}
 }
