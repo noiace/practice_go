@@ -60,9 +60,15 @@ func main() {
 		}
 	}
 
+	if !*showDuplicates && len(duplicates) > 0 {
+		is_valid = false
+		fmt.Println("Найдены слова дубликаты")
+		fmt.Printf("is_valid = %t \n", is_valid)
+	}
+
 	// Показ дубликатов (если флаг -s)
 	if *showDuplicates && len(duplicates) > 0 {
-		fmt.Println("Найдены дубликаты:", duplicates)
+		fmt.Println("Найденные слова дубликаты:", duplicates)
 	}
 
 	// Удаление дубликатов (если флаг -d)
@@ -85,6 +91,6 @@ func main() {
 
 		fmt.Printf("Дубликаты удалены. Результат сохранён в: %s\n", outputPath)
 	} else if len(duplicates) == 0 {
-		fmt.Printf("%t \nДубликатов не найдено.", is_valid)
+		fmt.Printf("is_valid = %t", is_valid)
 	}
 }
