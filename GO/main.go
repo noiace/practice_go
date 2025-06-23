@@ -20,24 +20,28 @@ var (
 )
 
 func main() {
+	var is_valid bool = true
 	// Парсим аргументы
 	kingpin.MustParse(app.Parse(os.Args[1:]))
 
 	// Проверка расширения файла
 	if filepath.Ext(*filePath) != ".txt" {
-		fmt.Println("Ошибка: файл должен иметь расширение .txt")
+		is_valid := false
+		fmt.Printf("%t \n Ошибка: файл должен иметь расширение .txt", is_valid)
 		return
 	}
 
 	// Чтение файла
 	data, err := os.ReadFile(*filePath)
 	if err != nil {
-		fmt.Printf("Ошибка чтения файла: %v\n", err)
+		is_valid := false
+		fmt.Printf("%t \n Ошибка чтения файла: %v\n", is_valid, err)
 		return
 	}
 
 	if len(data) == 0 {
-		fmt.Println("Файл пуст.")
+		is_valid := false
+		fmt.Printf("%t \n Файл пуст.", is_valid)
 		return
 	}
 
@@ -81,6 +85,6 @@ func main() {
 
 		fmt.Printf("Дубликаты удалены. Результат сохранён в: %s\n", outputPath)
 	} else if len(duplicates) == 0 {
-		fmt.Println("Дубликатов не найдено.")
+		fmt.Printf("%t \nДубликатов не найдено.", is_valid)
 	}
 }
