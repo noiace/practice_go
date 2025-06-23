@@ -17,6 +17,7 @@ var (
 	deleteDuplicates = app.Flag("delete-duplicates", "Удалить дубликаты без подтверждения").Short('d').Default("false").Bool()
 	showDuplicates   = app.Flag("show-duplicates", "Показать дубликаты").Short('s').Default("false").Bool()
 	mode             = app.Flag("mode", "Режим работы (create/rewrite)").Short('m').Default("rewrite").Enum("create", "rewrite")
+	verbose          = app.Flag("verbose", "Вывести подробную информацию").Short('v').Default("false").Bool()
 )
 
 func main() {
@@ -27,7 +28,10 @@ func main() {
 	// Проверка расширения файла
 	if filepath.Ext(*filePath) != ".txt" {
 		is_valid := false
-		fmt.Printf("%t \n Ошибка: файл должен иметь расширение .txt", is_valid)
+		fmt.Println(is_valid)
+		if *verbose {
+			fmt.Printf("Ошибка: файл должен иметь расширение .txt")
+		}
 		return
 	}
 
@@ -35,13 +39,19 @@ func main() {
 	data, err := os.ReadFile(*filePath)
 	if err != nil {
 		is_valid := false
-		fmt.Printf("%t \n Ошибка чтения файла: %v\n", is_valid, err)
+		fmt.Println(is_valid)
+		if *verbose {
+			fmt.Printf("Ошибка чтения файла: %v\n", err)
+		}
 		return
 	}
 
 	if len(data) == 0 {
 		is_valid := false
-		fmt.Printf("%t \n Файл пуст.", is_valid)
+		fmt.Println(is_valid)
+		if *verbose {
+			fmt.Println("Файл пуст.")
+		}
 		return
 	}
 
@@ -62,8 +72,10 @@ func main() {
 
 	if !*showDuplicates && len(duplicates) > 0 {
 		is_valid = false
-		fmt.Println("Найдены слова дубликаты")
-		fmt.Printf("is_valid = %t \n", is_valid)
+		fmt.Println(is_valid)
+		if *verbose {
+			fmt.Println("Найдены слова дубликаты")
+		}
 	}
 
 	// Показ дубликатов (если флаг -s)
@@ -91,6 +103,6 @@ func main() {
 
 		fmt.Printf("Дубликаты удалены. Результат сохранён в: %s\n", outputPath)
 	} else if len(duplicates) == 0 {
-		fmt.Printf("is_valid = %t", is_valid)
+		fmt.Println(is_valid)
 	}
 }
